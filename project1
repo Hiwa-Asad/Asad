@@ -1,0 +1,45 @@
+SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION,ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO';
+
+    SELECT 
+    order_items.*,
+    product_category_name_translation.product_category_name_english,
+    order_approved_at,
+    seller_id,
+    price,
+    product_id,
+    order_status,
+    order_estimated_delivery_date,
+    order_delivered_customer_date,
+    freight_value,
+    order_reviews.review_score, 
+    geo.city,
+    geo.state,
+    geo.lat,
+    geo.lng,
+    CASE
+        WHEN
+            product_category_name_translation.product_category_name_english IN ('audio' , 'computer_accessories',
+                'cine_photo',
+                'computers',
+                'consoles_games',
+                'electronics',
+                'pc_gamer',
+                'tablets_printing_image',
+                'telephony')
+        THEN
+            'tech'
+        ELSE 'other'
+    END AS 'tech'
+FROM
+    order_items
+        JOIN
+    orders USING (order_id)
+        JOIN
+    products USING (product_id)
+        JOIN
+    order_reviews USING (order_id)
+        JOIN
+    sellers USING (seller_id)
+    JOIN geo ON sellers.seller_zip_code_prefix = geo.zip_code_prefix
+        JOIN
+    product_category_name_translation ON product_category_name_translation.product_category_name = products.product_category_name;
